@@ -1,0 +1,22 @@
+# Local environment — copy .env.example and fill in your values
+.env
+
+# Runtime
+.mic.pid
+
+# Bird clip recordings and runtime data
+data/clips/*
+!data/clips/.gitkeep
+data/*.db
+data/*.db-shm
+data/*.db-wal
+data/logs/
+data/cache/
+
+# BirdNET-Go generated files
+config/.system_id
+config/logs/
+config/hls/
+
+# macOS
+.DS_Store
