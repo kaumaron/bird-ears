@@ -57,15 +57,39 @@ for i in $(seq 1 15); do
     sleep 1
 done
 
+# ── Resolve device name → avfoundation index ──────────────────────────────────
+
+resolve_device() {
+    local name="$1"
+    # If it's already a number, use it directly
+    if [[ "$name" =~ ^[0-9]+$ ]]; then
+        echo "$name"
+        return
+    fi
+    # Look up the index by exact name match
+    local idx
+    idx=$(ffmpeg -f avfoundation -list_devices true -i "" 2>&1 \
+        | grep -F "] ${name}" \
+        | grep -o '\[[0-9]*\]' | tail -1 | tr -d '[]')
+    echo "$idx"
+}
+
 # ── Helper: start one ffmpeg mic capture ──────────────────────────────────────
 
 start_mic() {
-    local device="$1" rtsp_path="$2" label="$3" pidfile="$4"
+    local device_name="$1" rtsp_path="$2" label="$3" pidfile="$4"
 
-    echo "Starting mic capture: ${label} (device :${device} → rtsp://localhost:8554/${rtsp_path})..."
+    local idx
+    idx=$(resolve_device "${device_name}")
+    if [ -z "$idx" ]; then
+        echo "Warning: '${label}' (${device_name}) not found — skipping."
+        return
+    fi
+
+    echo "Starting mic capture: ${label} (index ${idx} → rtsp://localhost:8554/${rtsp_path})..."
     ffmpeg \
         -f avfoundation \
-        -i ":${device}" \
+        -i ":${idx}" \
         -acodec aac \
         -ar 48000 \
         -ac 1 \
@@ -86,7 +110,6 @@ start_mic() {
         echo "  cat /tmp/bird-ears-ffmpeg.log"
         echo ""
         echo "Common causes:"
-        echo "  - Wrong device index (run ./find-mic.sh)"
         echo "  - Terminal missing microphone permission (System Settings → Privacy & Security → Microphone)"
         docker compose down
         exit 1
