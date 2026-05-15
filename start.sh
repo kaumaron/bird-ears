@@ -45,17 +45,21 @@ done
 
 # ── Start Docker stack ─────────────────────────────────────────────────────────
 
-echo "Starting mediamtx and birdnet-go..."
-docker compose up -d
+if nc -z localhost 8554 2>/dev/null; then
+    echo "Docker stack already running — skipping docker compose up."
+else
+    echo "Starting mediamtx and birdnet-go..."
+    docker compose up -d
 
-echo "Waiting for mediamtx RTSP server to be ready..."
-for i in $(seq 1 15); do
-    if nc -z localhost 8554 2>/dev/null; then
-        sleep 3  # let mediamtx finish initializing after port opens
-        break
-    fi
-    sleep 1
-done
+    echo "Waiting for mediamtx RTSP server to be ready..."
+    for i in $(seq 1 15); do
+        if nc -z localhost 8554 2>/dev/null; then
+            sleep 3
+            break
+        fi
+        sleep 1
+    done
+fi
 
 # ── Resolve device name → avfoundation index ──────────────────────────────────
 
