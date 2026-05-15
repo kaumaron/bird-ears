@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Starts the Docker stack (mediamtx + birdnet-go) and the host-side mic capture bridge.
 # macOS cannot pass USB audio directly into Docker containers, so ffmpeg runs on
-# the host and pushes the mic stream to mediamtx via RTSP.
+# the host and pushes each mic stream to mediamtx via RTSP.
 set -e
 
 # ── Prerequisites ──────────────────────────────────────────────────────────────
@@ -31,16 +31,17 @@ command -v docker >/dev/null 2>&1 || {
     exit 1
 }
 
-# ── Stop any leftover mic capture ──────────────────────────────────────────────
+# ── Stop any leftover mic captures ─────────────────────────────────────────────
 
-if [ -f .mic.pid ]; then
-    OLD_PID=$(cat .mic.pid)
+for pidfile in .mic*.pid; do
+    [ -f "$pidfile" ] || continue
+    OLD_PID=$(cat "$pidfile")
     if kill -0 "$OLD_PID" 2>/dev/null; then
         echo "Stopping previous mic capture (PID $OLD_PID)..."
         kill "$OLD_PID"
     fi
-    rm -f .mic.pid
-fi
+    rm -f "$pidfile"
+done
 
 # ── Start Docker stack ─────────────────────────────────────────────────────────
 
@@ -55,37 +56,48 @@ for i in $(seq 1 10); do
     sleep 1
 done
 
-# ── Start mic capture ──────────────────────────────────────────────────────────
+# ── Helper: start one ffmpeg mic capture ──────────────────────────────────────
 
-echo "Starting mic capture from avfoundation device :${MIC_DEVICE}..."
-ffmpeg \
-    -f avfoundation \
-    -i ":${MIC_DEVICE}" \
-    -acodec aac \
-    -ar 48000 \
-    -ac 1 \
-    -b:a 256k \
-    -f rtsp \
-    -rtsp_transport tcp \
-    rtsp://localhost:8554/birdmic \
-    -loglevel warning \
-    >> /tmp/bird-ears-ffmpeg.log 2>&1 &
+start_mic() {
+    local device="$1" rtsp_path="$2" label="$3" pidfile="$4"
 
-MIC_PID=$!
-echo $MIC_PID > .mic.pid
+    echo "Starting mic capture: ${label} (device :${device} → rtsp://localhost:8554/${rtsp_path})..."
+    ffmpeg \
+        -f avfoundation \
+        -i ":${device}" \
+        -acodec aac \
+        -ar 48000 \
+        -ac 1 \
+        -b:a 256k \
+        -f rtsp \
+        -rtsp_transport tcp \
+        "rtsp://localhost:8554/${rtsp_path}" \
+        -loglevel warning \
+        >> /tmp/bird-ears-ffmpeg.log 2>&1 &
 
-# Verify the process actually started
-sleep 2
-if ! kill -0 "$MIC_PID" 2>/dev/null; then
-    echo ""
-    echo "Error: mic capture failed to start. Check the log:"
-    echo "  cat /tmp/bird-ears-ffmpeg.log"
-    echo ""
-    echo "Common causes:"
-    echo "  - Wrong MIC_DEVICE index (run ./find-mic.sh)"
-    echo "  - Terminal missing microphone permission (System Settings → Privacy & Security → Microphone)"
-    docker compose down
-    exit 1
+    local pid=$!
+    echo $pid > "$pidfile"
+
+    sleep 2
+    if ! kill -0 "$pid" 2>/dev/null; then
+        echo ""
+        echo "Error: mic capture failed for ${label}. Check the log:"
+        echo "  cat /tmp/bird-ears-ffmpeg.log"
+        echo ""
+        echo "Common causes:"
+        echo "  - Wrong device index (run ./find-mic.sh)"
+        echo "  - Terminal missing microphone permission (System Settings → Privacy & Security → Microphone)"
+        docker compose down
+        exit 1
+    fi
+}
+
+# ── Start mic captures ─────────────────────────────────────────────────────────
+
+start_mic "${MIC_DEVICE}" "birdmic-hermes" "Hermes" ".mic1.pid"
+
+if [ -n "${MIC_DEVICE_2}" ]; then
+    start_mic "${MIC_DEVICE_2}" "birdmic-comica" "Comica VM30" ".mic2.pid"
 fi
 
 PORT=${WEB_PORT:-8080}

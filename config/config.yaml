@@ -33,6 +33,14 @@ logging:
             max_size: 0
             max_age: 0
             max_rotated_files: 0
+        analysis.processor:
+            enabled: true
+            file_path: logs/actions.log
+            level: ""
+            console_also: true
+            max_size: 0
+            max_age: 0
+            max_rotated_files: 0
         api:
             enabled: true
             file_path: logs/api.log
@@ -45,6 +53,22 @@ logging:
             enabled: true
             file_path: logs/audio.log
             level: debug
+            console_also: false
+            max_size: 0
+            max_age: 0
+            max_rotated_files: 0
+        audio.ffmpeg:
+            enabled: true
+            file_path: logs/audio.log
+            level: ""
+            console_also: false
+            max_size: 0
+            max_age: 0
+            max_rotated_files: 0
+        audiocore:
+            enabled: true
+            file_path: logs/audio.log
+            level: ""
             console_also: false
             max_size: 0
             max_age: 0
@@ -177,6 +201,14 @@ logging:
             max_size: 0
             max_age: 0
             max_rotated_files: 0
+        spectrogram.prerenderer:
+            enabled: true
+            file_path: logs/spectrogram.log
+            level: ""
+            console_also: false
+            max_size: 0
+            max_age: 0
+            max_rotated_files: 0
         support:
             enabled: true
             file_path: logs/support.log
@@ -246,14 +278,14 @@ realtime:
     processingtime: false
     audio:
         sources: []
-        ffmpegpath: ""
-        soxpath: ""
+        ffmpegpath: /usr/bin/ffmpeg
+        soxpath: /usr/bin/sox
         streamtransport: sse
         export:
             debug: false
             enabled: true
             path: /data/clips
-            type: wav
+            type: mp3
             bitrate: 96k
             retention:
                 debug: false
@@ -283,13 +315,13 @@ realtime:
                   frequency: 100
                   q: 0.7
                   gain: 0
-                  width: 0
+                  width: 1
                   passes: 0
                 - type: LowPass
                   frequency: 15000
                   q: 0.7
                   gain: 0
-                  width: 0
+                  width: 1
                   passes: 0
         quietHours:
             enabled: false
@@ -383,8 +415,24 @@ realtime:
         species: []
     rtsp:
         streams:
-            - name: USB Microphone
-              url: rtsp://mediamtx:8554/birdmic
+            - name: Hermes Microphone
+              url: rtsp://mediamtx:8554/birdmic-hermes
+              enabled: true
+              type: rtsp
+              transport: tcp
+              quietHours:
+                enabled: false
+                mode: ""
+                startTime: ""
+                endTime: ""
+                startEvent: ""
+                startOffset: 0
+                endEvent: ""
+                endOffset: 0
+              models:
+                - birdnet
+            - name: Comica VM30
+              url: rtsp://mediamtx:8554/birdmic-comica
               enabled: true
               type: rtsp
               transport: tcp
@@ -523,18 +571,6 @@ security:
         redirecturi: /settings
         authcodeexp: 10m0s
         accesstokenexp: 1h0m0s
-    googleAuth:
-        enabled: false
-        clientid: ""
-        clientsecret: ""
-        redirecturi: /settings
-        userid: ""
-    githubAuth:
-        enabled: false
-        clientid: ""
-        clientsecret: ""
-        redirecturi: /settings
-        userid: ""
     sessionsecret: DfG9Vwj9-Uol8ZSnOccEQXn_5fQQyWuNe-0xAnZUMT4
     sessionduration: 168h0m0s
 sentry:

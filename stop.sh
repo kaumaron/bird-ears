@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
 set -e
 
-if [ -f .mic.pid ]; then
-    PID=$(cat .mic.pid)
+for pidfile in .mic*.pid; do
+    [ -f "$pidfile" ] || continue
+    PID=$(cat "$pidfile")
     if kill -0 "$PID" 2>/dev/null; then
         kill "$PID"
         echo "Mic capture stopped (PID $PID)."
     fi
-    rm -f .mic.pid
-fi
+    rm -f "$pidfile"
+done
 
 docker compose down
 echo "Bird ears stopped."
