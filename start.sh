@@ -49,8 +49,9 @@ echo "Starting mediamtx and birdnet-go..."
 docker compose up -d
 
 echo "Waiting for mediamtx RTSP server to be ready..."
-for i in $(seq 1 10); do
+for i in $(seq 1 15); do
     if nc -z localhost 8554 2>/dev/null; then
+        sleep 3  # let mediamtx finish initializing after port opens
         break
     fi
     sleep 1
@@ -98,6 +99,10 @@ start_mic "${MIC_DEVICE}" "birdmic-hermes" "Hermes" ".mic1.pid"
 
 if [ -n "${MIC_DEVICE_2}" ]; then
     start_mic "${MIC_DEVICE_2}" "birdmic-comica" "Comica VM30" ".mic2.pid"
+fi
+
+if [ -n "${MIC_DEVICE_3}" ]; then
+    start_mic "${MIC_DEVICE_3}" "birdmic-caldigit" "CalDigit Analog" ".mic3.pid"
 fi
 
 PORT=${WEB_PORT:-8080}

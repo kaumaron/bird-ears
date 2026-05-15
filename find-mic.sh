@@ -7,16 +7,16 @@ command -v ffmpeg >/dev/null 2>&1 || {
     exit 1
 }
 
-echo "Available audio input devices (look for your USB mic):"
+echo "Available audio input devices:"
 echo ""
 ffmpeg -f avfoundation -list_devices true -i "" 2>&1 \
     | awk '/AVFoundation audio devices/,0' \
-    | grep -v "^$" \
-    | head -30
+    | grep -E '\[[0-9]+\]'
 
 echo ""
-echo "Set the number shown in brackets in your .env file:"
-echo "  MIC_DEVICE=1   (for a device shown as [1])"
+echo "Set the device NAME (not number) in your .env — names are stable across reconnects:"
+echo "  MIC_DEVICE=Hermes (17) Microphone"
+echo "  MIC_DEVICE_2=Comica_VM30 TX"
 echo ""
 echo "Also open System Settings → Privacy & Security → Microphone"
 echo "and make sure Terminal has microphone access."

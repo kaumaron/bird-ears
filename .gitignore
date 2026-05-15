@@ -13,6 +13,9 @@ data/*.db-wal
 data/logs/
 data/cache/
 
+# BirdNET-Go runtime config (contains location; use config.yaml.example as template)
+config/config.yaml
+
 # BirdNET-Go generated files
 config/.system_id
 config/logs/

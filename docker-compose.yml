@@ -10,12 +10,16 @@ services:
   birdnet-go:
     image: ghcr.io/tphakala/birdnet-go:nightly
     container_name: bird-ears-birdnet
+    init: true
+    stop_grace_period: 5s
     ports:
       - "${WEB_PORT:-8080}:8080"
     environment:
       - TZ=${TZ:-UTC}
       - BIRDNET_UID=${BIRDNET_UID:-1000}
       - BIRDNET_GID=${BIRDNET_GID:-1000}
+      - BIRDNET_LATITUDE=${BIRDNET_LATITUDE}
+      - BIRDNET_LONGITUDE=${BIRDNET_LONGITUDE}
     volumes:
       - ./config:/config
       - ./data:/data

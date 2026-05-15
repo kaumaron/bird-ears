@@ -242,9 +242,9 @@ birdnet:
     sensitivity: 1
     threshold: 0.7
     overlap: 1.5
-    longitude: -74.1887
-    latitude: 40.7934
-    locationconfigured: true
+    longitude: 0.000
+    latitude: 0.000
+    locationconfigured: false
     threads: 0
     locale: en-us
     rangefilter:
@@ -415,7 +415,7 @@ realtime:
         species: []
     rtsp:
         streams:
-            - name: Hermes Microphone
+            - name: Microphone 1
               url: rtsp://mediamtx:8554/birdmic-hermes
               enabled: true
               type: rtsp
@@ -431,8 +431,24 @@ realtime:
                 endOffset: 0
               models:
                 - birdnet
-            - name: Comica VM30
+            - name: Microphone 2
               url: rtsp://mediamtx:8554/birdmic-comica
+              enabled: true
+              type: rtsp
+              transport: tcp
+              quietHours:
+                enabled: false
+                mode: ""
+                startTime: ""
+                endTime: ""
+                startEvent: ""
+                startOffset: 0
+                endEvent: ""
+                endOffset: 0
+              models:
+                - birdnet
+            - name: Microphone 3
+              url: rtsp://mediamtx:8554/birdmic-caldigit
               enabled: true
               type: rtsp
               transport: tcp
