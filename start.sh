@@ -121,16 +121,17 @@ start_mic() {
 }
 
 # ── Start mic captures ─────────────────────────────────────────────────────────
+# Slots map to fixed RTSP paths (birdmic-1..5). Add MIC_DEVICE_N to .env to
+# fill a slot — no config.yaml editing needed.
 
-start_mic "${MIC_DEVICE}" "birdmic-hermes" "Hermes" ".mic1.pid"
-
-if [ -n "${MIC_DEVICE_2}" ]; then
-    start_mic "${MIC_DEVICE_2}" "birdmic-comica" "Comica VM30" ".mic2.pid"
-fi
-
-if [ -n "${MIC_DEVICE_3}" ]; then
-    start_mic "${MIC_DEVICE_3}" "birdmic-caldigit" "CalDigit Analog" ".mic3.pid"
-fi
+slot=1
+for var in MIC_DEVICE MIC_DEVICE_2 MIC_DEVICE_3 MIC_DEVICE_4 MIC_DEVICE_5; do
+    val="${!var}"
+    if [ -n "$val" ]; then
+        start_mic "$val" "birdmic-${slot}" "Mic ${slot}" ".mic${slot}.pid"
+    fi
+    (( slot++ ))
+done
 
 PORT=${WEB_PORT:-8080}
 echo ""

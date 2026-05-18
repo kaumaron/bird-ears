@@ -416,7 +416,7 @@ realtime:
     rtsp:
         streams:
             - name: Microphone 1
-              url: rtsp://mediamtx:8554/birdmic-hermes
+              url: rtsp://mediamtx:8554/birdmic-1
               enabled: true
               type: rtsp
               transport: tcp
@@ -432,7 +432,7 @@ realtime:
               models:
                 - birdnet
             - name: Microphone 2
-              url: rtsp://mediamtx:8554/birdmic-comica
+              url: rtsp://mediamtx:8554/birdmic-2
               enabled: true
               type: rtsp
               transport: tcp
@@ -448,7 +448,39 @@ realtime:
               models:
                 - birdnet
             - name: Microphone 3
-              url: rtsp://mediamtx:8554/birdmic-caldigit
+              url: rtsp://mediamtx:8554/birdmic-3
+              enabled: true
+              type: rtsp
+              transport: tcp
+              quietHours:
+                enabled: false
+                mode: ""
+                startTime: ""
+                endTime: ""
+                startEvent: ""
+                startOffset: 0
+                endEvent: ""
+                endOffset: 0
+              models:
+                - birdnet
+            - name: Microphone 4
+              url: rtsp://mediamtx:8554/birdmic-4
+              enabled: true
+              type: rtsp
+              transport: tcp
+              quietHours:
+                enabled: false
+                mode: ""
+                startTime: ""
+                endTime: ""
+                startEvent: ""
+                startOffset: 0
+                endEvent: ""
+                endOffset: 0
+              models:
+                - birdnet
+            - name: Microphone 5
+              url: rtsp://mediamtx:8554/birdmic-5
               enabled: true
               type: rtsp
               transport: tcp
