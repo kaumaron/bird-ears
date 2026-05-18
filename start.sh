@@ -76,7 +76,7 @@ start_mic() {
         -rtbufsize 500M \
         -thread_queue_size 4096 \
         -i ":${idx}" \
-        -af "highpass=f=150" \
+        -af "highpass=f=150,lowpass=f=12000,afftdn=nf=-25:track_noise=1" \
         -acodec aac \
         -ar 48000 \
         -ac 1 \
