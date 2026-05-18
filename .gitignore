@@ -3,6 +3,7 @@
 
 # Runtime
 .mic.pid
+.birdnet-home/
 
 # Bird clip recordings and runtime data
 data/clips/*
