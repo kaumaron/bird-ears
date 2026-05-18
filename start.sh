@@ -73,6 +73,8 @@ start_mic() {
     echo "Starting mic capture: ${label} (index ${idx} → rtsp://localhost:8554/${rtsp_path})..."
     ffmpeg \
         -f avfoundation \
+        -rtbufsize 100M \
+        -thread_queue_size 512 \
         -i ":${idx}" \
         -acodec aac \
         -ar 48000 \
