@@ -43,34 +43,14 @@ for pidfile in .mic*.pid; do
     rm -f "$pidfile"
 done
 
-# ── Start Docker stack ─────────────────────────────────────────────────────────
-
-if nc -z localhost 8554 2>/dev/null; then
-    echo "Docker stack already running — skipping docker compose up."
-else
-    echo "Starting mediamtx and birdnet-go..."
-    docker compose up -d
-
-    echo "Waiting for mediamtx RTSP server to be ready..."
-    for i in $(seq 1 15); do
-        if nc -z localhost 8554 2>/dev/null; then
-            sleep 3
-            break
-        fi
-        sleep 1
-    done
-fi
-
 # ── Resolve device name → avfoundation index ──────────────────────────────────
 
 resolve_device() {
     local name="$1"
-    # If it's already a number, use it directly
     if [[ "$name" =~ ^[0-9]+$ ]]; then
         echo "$name"
         return
     fi
-    # Look up the index by exact name match
     local idx
     idx=$(ffmpeg -f avfoundation -list_devices true -i "" 2>&1 \
         | grep -F "] ${name}" \
@@ -120,9 +100,27 @@ start_mic() {
     fi
 }
 
-# ── Start mic captures ─────────────────────────────────────────────────────────
-# Slots map to fixed RTSP paths (birdmic-1..5). Add MIC_DEVICE_N to .env to
-# fill a slot — no config.yaml editing needed.
+# ── Start mediamtx only ────────────────────────────────────────────────────────
+
+STACK_RUNNING=false
+if nc -z localhost 8554 2>/dev/null; then
+    echo "mediamtx already running — skipping."
+    STACK_RUNNING=true
+else
+    echo "Starting mediamtx..."
+    docker compose up -d mediamtx
+
+    echo "Waiting for mediamtx RTSP server to be ready..."
+    for i in $(seq 1 15); do
+        if nc -z localhost 8554 2>/dev/null; then
+            sleep 2
+            break
+        fi
+        sleep 1
+    done
+fi
+
+# ── Start mic captures (before birdnet-go so streams are ready when it connects) ──
 
 slot=1
 for var in MIC_DEVICE MIC_DEVICE_2 MIC_DEVICE_3 MIC_DEVICE_4 MIC_DEVICE_5; do
@@ -132,6 +130,22 @@ for var in MIC_DEVICE MIC_DEVICE_2 MIC_DEVICE_3 MIC_DEVICE_4 MIC_DEVICE_5; do
     fi
     (( slot++ ))
 done
+
+# ── Start birdnet-go after streams are publishing ─────────────────────────────
+
+if [ "$STACK_RUNNING" = false ]; then
+    echo "Waiting for mic streams to be ready..."
+    for i in $(seq 1 10); do
+        if docker logs bird-ears-rtsp 2>&1 | grep -q "is publishing"; then
+            sleep 2  # let streams stabilize
+            break
+        fi
+        sleep 1
+    done
+
+    echo "Starting birdnet-go..."
+    docker compose up -d birdnet-go
+fi
 
 PORT=${WEB_PORT:-8080}
 echo ""

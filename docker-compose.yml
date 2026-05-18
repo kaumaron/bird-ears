@@ -29,7 +29,7 @@ services:
       - ./config:/home/birdnet/.config/birdnet-go
       - ./data:/data
     tmpfs:
-      - /home/birdnet/.config/birdnet-go/hls:exec,size=50M,mode=0755
+      - /home/birdnet/.config/birdnet-go/hls:exec,size=50M,uid=${BIRDNET_UID:-1000},gid=${BIRDNET_GID:-1000},mode=0755
     depends_on:
       - mediamtx
     restart: unless-stopped

@@ -610,7 +610,7 @@ security:
         enabled: false
         subnet: ""
     publicaccess:
-        liveaudio: false
+        liveaudio: true
     basicauth:
         enabled: false
         password: ""
