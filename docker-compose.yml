@@ -24,6 +24,7 @@ services:
       - HOME=/home/birdnet
       - BIRDNET_LATITUDE=${BIRDNET_LATITUDE}
       - BIRDNET_LONGITUDE=${BIRDNET_LONGITUDE}
+      - BIRDNET_HOST=${BIRDNET_HOST}
     volumes:
       # Mount config directly to where birdnet-go looks for it (no symlink needed)
       - ./config:/home/birdnet/.config/birdnet-go
